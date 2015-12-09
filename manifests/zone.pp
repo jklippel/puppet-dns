@@ -199,14 +199,14 @@ define dns::zone (
     # the stage file, thanks to this serial is updated only in case of need.
     $zone_serial = inline_template('<%= Time.now.to_i %>')
     exec { "bump-${zone}-serial":
-      command     => "sed '8s/_SERIAL_/${zone_serial}/' ${zone_file_stage} > ${zone_file}",
-      path        => ['/bin', '/sbin', '/usr/bin', '/usr/sbin'],
-      refreshonly => true,
-      provider    => posix,
-      user        => $dns::server::params::owner,
-      group       => $dns::server::params::group,
-      require     => Class['dns::server::install'],
-      notify      => Class['dns::server::service'],
+      command  => "sed '8s/_SERIAL_/${zone_serial}/' ${zone_file_stage} > ${zone_file}",
+      path     => ['/bin', '/sbin', '/usr/bin', '/usr/sbin'],
+      onlyif   => "/usr/bin/test $(/usr/bin/diff -I '.*; Serial' ${zone_file_stage} ${zone_file};echo $?) -ne 0",
+      provider => posix,
+      user     => $dns::server::params::owner,
+      group    => $dns::server::params::group,
+      require  => Class['dns::server::install'],
+      notify   => Class['dns::server::service'],
     }
   } else {
     # For any zone file that is not a master zone, we should make sure
