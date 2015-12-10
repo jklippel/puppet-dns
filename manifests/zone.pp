@@ -201,7 +201,7 @@ define dns::zone (
     exec { "bump-${zone}-serial":
       command  => "sed '8s/_SERIAL_/${zone_serial}/' ${zone_file_stage} > ${zone_file}",
       path     => ['/bin', '/sbin', '/usr/bin', '/usr/sbin'],
-      onlyif   => "/usr/bin/test $(/usr/bin/diff -I '.*; Serial' ${zone_file_stage} ${zone_file};echo $?) -ne 0",
+      onlyif   => "/usr/bin/test $(/usr/bin/diff >/dev/null 2>&1 -I '.*; Serial' ${zone_file_stage} ${zone_file};echo $?) -ne 0",
       provider => posix,
       user     => $dns::server::params::owner,
       group    => $dns::server::params::group,
